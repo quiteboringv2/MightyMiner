@@ -5,10 +5,7 @@ import com.jelly.mightyminerv2.feature.impl.Pathfinder;
 import com.jelly.mightyminerv2.handler.RotationHandler;
 import com.jelly.mightyminerv2.handler.RouteHandler;
 import com.jelly.mightyminerv2.macro.impl.RouteMiner.RouteMinerMacro;
-import com.jelly.mightyminerv2.util.AngleUtil;
-import com.jelly.mightyminerv2.util.BlockUtil;
-import com.jelly.mightyminerv2.util.InventoryUtil;
-import com.jelly.mightyminerv2.util.KeyBindUtil;
+import com.jelly.mightyminerv2.util.*;
 import com.jelly.mightyminerv2.util.helper.Clock;
 import com.jelly.mightyminerv2.util.helper.RotationConfiguration;
 import com.jelly.mightyminerv2.util.helper.route.Route;
@@ -30,6 +27,8 @@ public class MovingState implements RouteMinerMacroState {
     private RouteWaypoint routeTarget;
     private final Clock etherWarpDelay = new Clock();
     private boolean hasClicked = false;
+
+    private boolean isWalking = false;
 
     @Override
     public void onStart(RouteMinerMacro macro) {
@@ -79,12 +78,28 @@ public class MovingState implements RouteMinerMacroState {
 
                 return this;
             case WALK:
-                if (Pathfinder.getInstance().completedPathTo(routeTarget.toBlockPos())) {
-                    macro.setRouteIndex(macro.getRouteIndex() + 1);
-                    return new MovingState();
+                if (isWalking) {
+                    if (
+                        Pathfinder.getInstance().completedPathTo(routeTarget.toBlockPos()) ||
+                        (!Pathfinder.getInstance().isRunning() && Pathfinder.getInstance().succeeded()) ||
+                        PlayerUtil.getBlockStandingOn().equals(routeTarget.toBlockPos())
+                    ) {
+                        macro.setRouteIndex(macro.getRouteIndex() + 1);
+                        return new MovingState();
+                    }
+
+                    if (Pathfinder.getInstance().failed()) {
+                        macro.disable("Pathfinding failed");
+                        return null;
+                    }
+
+                    return this;
                 }
 
-                Pathfinder.getInstance().stopAndRequeue(routeTarget.toBlockPos());
+                Pathfinder.getInstance().queue(routeTarget.toBlockPos());
+                Pathfinder.getInstance().start();
+                isWalking = true;
+
                 break;
             default:
                 return new MiningState();

@@ -22,9 +22,9 @@ public class RouteBuilderCommand {
         info("   1. /rb list -> List all available routes.");
         info("   2. /rb select <route-name> -> Select the specified route name. A new route will be created if none exist.");
         info("   3. /rb add <walk|etherwarp|mine> -> Add the block player is standing on to selected route.");
-        info("   4. /rb remove -> Remove the block player is standing on from selected route.");
-        info("   5. /rb replace <index> -> Replaces Specified Index from the route with block player is standing on.");
-        info("   6. /rb clear <route-name> -> Deletes the route.");
+        info("   4. /rb remove <index> -> Remove the block player is standing on from selected route.");
+        info("   5. /rb replace <index> <walk|etherwarp|mine> -> Replaces Specified Index from the route with block player is standing on.");
+        info("   6. /rb delete <route-name> -> Deletes the route.");
     }
 
     @SubCommand
@@ -39,6 +39,12 @@ public class RouteBuilderCommand {
         });
 
         Logger.sendMessage(sb.toString());
+    }
+
+    @SubCommand
+    public void reload() {
+        RouteHandler.getInstance().loadData();
+        Logger.sendMessage("Refreshed routes file.");
     }
 
     @SubCommand
