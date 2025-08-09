@@ -38,7 +38,7 @@ public class FailsafeManager {
             KnockbackFailsafe.getInstance(),
             WorldChangeFailsafe.getInstance(),
             ProfileFailsafe.getInstance(),
-            ItemChangeFailsafe.getInstance(),
+            // ItemChangeFailsafe.getInstance(),
             NameMentionFailsafe.getInstance()
         ));
     }
